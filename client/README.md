@@ -3,6 +3,7 @@
 ```
 yarn create react-app . --template typescript
 yarn add axios @types/axios
+yarn add @material-ui/core @material-ui/icons
 yarn add react-router @types/react-router react-router-dom @types/react-router-dom
 yarn add -D eslint prettier 
 yarn add -D @typescript-eslint/eslint-plugin @typescript-eslint/parser
