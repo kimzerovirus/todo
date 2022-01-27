@@ -4,6 +4,7 @@ import com.kzv.server.dto.ResponseDto;
 import com.kzv.server.dto.TodoDto;
 import com.kzv.server.model.TodoEntity;
 import com.kzv.server.service.TodoService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
+@CrossOrigin("*") //webconfig설정으로 안되서 어노테이션 사용함...
 @RestController
 @RequestMapping("todo")
 public class TodoController {
@@ -63,7 +66,7 @@ public class TodoController {
 
     @GetMapping
     public ResponseEntity<?> retrieveTodoList() {
-        String temporaryUserId = "temporary-use";
+        String temporaryUserId = "temporary-user";
 
         // 1. Todo 리스트 가져오기
         List<TodoEntity> entities = service.retrieve(temporaryUserId);
@@ -75,7 +78,7 @@ public class TodoController {
 
         // 3. 변환된 리스트로 ResponseDto 초기화
         ResponseDto<TodoDto> res = ResponseDto.<TodoDto>builder().data(dtos).build();
-
+        System.out.println(entities);
         // 4. dto리턴
         return ResponseEntity.ok().body(res);
     }
