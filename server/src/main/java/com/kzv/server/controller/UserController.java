@@ -3,6 +3,7 @@ package com.kzv.server.controller;
 import com.kzv.server.dto.ResponseDto;
 import com.kzv.server.dto.UserDto;
 import com.kzv.server.model.UserEntity;
+import com.kzv.server.security.TokenProvider;
 import com.kzv.server.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,10 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TokenProvider tokenProvider;
+
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody UserDto userDto) {
@@ -60,11 +65,14 @@ public class UserController {
         );
 
         if (user != null) {
+            //토큰 생성
+            final String token = tokenProvider.create(user);
             final UserDto responseUserDto = UserDto.builder()
                     .email(user.getEmail())
                     .id(user.getId())
+                    .token(token)
                     .build();
-            return ResponseEntity.ok().body(responseUserDto)
+            return ResponseEntity.ok().body(responseUserDto);
         } else {
             ResponseDto responseDto = ResponseDto.builder()
                     .error("Login failed")
