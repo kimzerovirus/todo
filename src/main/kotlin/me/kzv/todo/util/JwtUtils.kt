@@ -11,8 +11,7 @@ import java.security.Key
 import java.util.*
 
 
-private const val SECRET_KEY: String =
-    "c3ByaW5nLWJvb3Qtc2VjdXJdc3ByaW5nLWJvb3Qtc2VjdXc3ByaW5nLWJvb3Qtc2VjdXJpd3ByaW5nLWJvb3Qtc2VjdXJpd"
+private const val SECRET_KEY: String = "c3ByaW5nLWJvb3Qtc2VjdXJdc3ByaW5nLWJvb3Qtc2VjdXc3ByaW5nLWJvb3Qtc2VjdXJpd3ByaW5nLWJvb3Qtc2VjdXJpd"
 private const val EXPIRED_TIME: Long = 1000 * 60 * 15 // 15분
 
 private val keyBytes: ByteArray = Decoders.BASE64.decode(SECRET_KEY)

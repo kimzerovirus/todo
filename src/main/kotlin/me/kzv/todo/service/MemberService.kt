@@ -6,6 +6,7 @@ import me.kzv.todo.dto.MemberResponse
 import me.kzv.todo.dto.toResponse
 import me.kzv.todo.entity.Member
 import me.kzv.todo.repository.MemberRepository
+import me.kzv.todo.util.createToken
 import me.kzv.todo.util.hashedPassword
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,8 +36,9 @@ class MemberService (
         if (findMember == null || findMember.isInValidPassword(request.password)) {
             throw UnAuthorizationException("로그인 실패")
         }
+        val token = createToken(findMember.userId)
 
-        return findMember.toResponse("임시 토큰")
+        return findMember.toResponse(token)
     }
 
 }
