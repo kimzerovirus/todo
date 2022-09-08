@@ -1,4 +1,4 @@
-package me.kzv.todo.dto
+package me.kzv.todo.controller.dto
 
 import me.kzv.todo.entity.Member
 

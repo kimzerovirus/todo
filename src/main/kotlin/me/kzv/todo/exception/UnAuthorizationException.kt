@@ -1,4 +1,4 @@
-package me.kzv.todo.advice.exception
+package me.kzv.todo.exception
 
 import java.lang.RuntimeException
 

@@ -1,8 +1,7 @@
 package me.kzv.todo.controller
 
-import me.kzv.todo.dto.MemberRequest
-import me.kzv.todo.dto.MemberResponse
-import me.kzv.todo.dto.toResponse
+import me.kzv.todo.controller.dto.MemberRequest
+import me.kzv.todo.controller.dto.MemberResponse
 import me.kzv.todo.service.MemberService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody

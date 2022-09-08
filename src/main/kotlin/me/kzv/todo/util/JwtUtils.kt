@@ -5,8 +5,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
-import me.kzv.todo.advice.exception.UnAuthorizationException
-import java.lang.RuntimeException
+import me.kzv.todo.exception.UnAuthorizationException
 import java.security.Key
 import java.util.*
 

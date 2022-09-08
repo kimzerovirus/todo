@@ -1,6 +1,6 @@
-package me.kzv.todo.advice
+package me.kzv.todo.controller.advice
 
-import me.kzv.todo.advice.exception.UnAuthorizationException
+import me.kzv.todo.exception.UnAuthorizationException
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus

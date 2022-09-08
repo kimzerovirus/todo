@@ -1,6 +1,6 @@
 package me.kzv.todo.interceptor
 
-import me.kzv.todo.advice.exception.UnAuthorizationException
+import me.kzv.todo.exception.UnAuthorizationException
 import me.kzv.todo.util.parseToken
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils.hasText

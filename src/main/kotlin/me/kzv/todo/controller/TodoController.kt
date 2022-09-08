@@ -1,6 +1,6 @@
 package me.kzv.todo.controller
 
-import me.kzv.todo.dto.TodoRequest
+import me.kzv.todo.controller.dto.TodoRequest
 import me.kzv.todo.entity.Todo
 import me.kzv.todo.service.TodoService
 import org.springframework.web.bind.annotation.PostMapping

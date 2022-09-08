@@ -1,6 +1,6 @@
 package me.kzv.todo.service
 
-import me.kzv.todo.dto.TodoRequest
+import me.kzv.todo.controller.dto.TodoRequest
 import me.kzv.todo.entity.Member
 import me.kzv.todo.entity.Todo
 import me.kzv.todo.repository.TodoRepository
