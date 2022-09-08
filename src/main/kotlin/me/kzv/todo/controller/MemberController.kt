@@ -15,9 +15,12 @@ class MemberController(
     private val memberService: MemberService
 ) {
 
-    @PostMapping("/login")
-    fun login(@RequestBody request: MemberRequest): MemberResponse {
-        val member = memberService.login(request)
-        return member.toResponse("임시 토큰")
+    @PostMapping("/register")
+    fun register(@RequestBody request: MemberRequest){
+        memberService.register(request)
     }
+
+    @PostMapping("/login")
+    fun login(@RequestBody request: MemberRequest): MemberResponse = memberService.login(request)
+
 }

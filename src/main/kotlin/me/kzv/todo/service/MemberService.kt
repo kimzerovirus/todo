@@ -2,6 +2,8 @@ package me.kzv.todo.service
 
 import me.kzv.todo.advice.exception.UnAuthorizationException
 import me.kzv.todo.dto.MemberRequest
+import me.kzv.todo.dto.MemberResponse
+import me.kzv.todo.dto.toResponse
 import me.kzv.todo.entity.Member
 import me.kzv.todo.repository.MemberRepository
 import me.kzv.todo.util.hashedPassword
@@ -26,7 +28,7 @@ class MemberService (
     }
 
     @Transactional(readOnly = true)
-    fun login(request: MemberRequest): Member{
+    fun login(request: MemberRequest): MemberResponse{
         val findMember = memberRepository.findByUserId(request.userId)
 
         // 아이디가 존재하지 않거나 비밀번호가 일치하지 않는 경우
@@ -34,7 +36,7 @@ class MemberService (
             throw UnAuthorizationException("로그인 실패")
         }
 
-        return findMember
+        return findMember.toResponse("임시 토큰")
     }
 
 }

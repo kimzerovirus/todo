@@ -6,14 +6,13 @@ import javax.persistence.*
 
 @Entity
 class Member(
-    var username: String,
-    var userId: String,
-    var password: String,
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     @Column(name = "member_id")
-    var id: Long? = null
+    var userId: String,
+    var username: String,
+    var password: String,
 ) {
+    constructor(id: String) : this(id,"","")
 
     fun isInValidPassword(password: String): Boolean {
         return this.password != hashedPassword(password)
