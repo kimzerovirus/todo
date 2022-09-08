@@ -25,6 +25,11 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    // jwt
+    implementation(group = "io.jsonwebtoken", name = "jjwt-api", version = "0.11.2")
+    runtimeOnly(group = "io.jsonwebtoken", name = "jjwt-impl", version = "0.11.2")
+    runtimeOnly(group = "io.jsonwebtoken", name = "jjwt-jackson", version = "0.11.2")
 }
 
 tasks.withType<KotlinCompile> {

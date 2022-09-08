@@ -26,10 +26,9 @@
 <body>
 <div id="root"></div>
 
-<script data-plugins="transform-es2015-modules-umd" type="text/babel" src="./Router.js"></script>
+<script data-plugins="transform-es2015-modules-umd" type="text/babel" src="Router.jsx"></script>
 <script data-plugins="transform-es2015-modules-umd" type="text/babel">
-    import Router from './Router.js'
-    import { theme } from './theme'
+    import Router from './Router.jsx'
 
     const {
         useState,
@@ -47,6 +46,21 @@
         SvgIcon,
         Link,
     } = MaterialUI;
+
+
+    const theme = createTheme({
+        palette: {
+            primary: {
+                main: '#556cd6',
+            },
+            secondary: {
+                main: '#19857b',
+            },
+            error: {
+                main: colors.red.A400,
+            },
+        },
+    });
 
 
     function App() {
