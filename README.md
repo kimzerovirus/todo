@@ -1,2 +1,1 @@
-service : 엔티티를 반환
-controller : response 객체로 변환
+코프링 부트와 조금 이상한? 리액트

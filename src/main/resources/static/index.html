@@ -62,11 +62,79 @@
         },
     });
 
+    const apiCall = (url, method, body) => {
+        const token = window.localStorage.getItem("token")
+        const headers = new Headers({
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+        })
+
+        fetch(url, {
+            headers,
+            method,
+            body: JSON.stringify(body)
+        })
+            .then(res => {
+                return res.json()
+            })
+            .catch(err => {
+                if (err.status === 401) {
+                    window.localStorage.removeItem('token')
+                    window.location.href = './login'
+                }
+            })
+    }
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////// COMPONENTS ///////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    function Todo(){
+        return (
+            <h1>TODO</h1>
+        )
+    }
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////// PAGES ///////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    function LoginPage(){
+        return(
+            <h1>Login Page</h1>
+        )
+    }
+
+    function RegisterPage(){
+        return (
+            <h1>Register Page</h1>
+        )
+    }
+
+    function MainPage(){
+        return (
+            <h1>MainPage</h1>
+        )
+    }
+
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////// APP //////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     function App() {
         return (
             <Router routes={{
-                '/': <h1>hello</h1>,
+                '/': <MainPage/>,
+                '/login': <LoginPage/>,
+                '/register': <RegisterPage/>
             }}/>
         )
     }
@@ -75,7 +143,6 @@
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(
         <ThemeProvider theme={theme}>
-            {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
             <CssBaseline/>
             <App/>
         </ThemeProvider>,
