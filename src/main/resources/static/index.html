@@ -47,6 +47,17 @@
         Grid,
         Box,
         createTheme,
+
+        Card,
+        Checkbox,
+        IconButton,
+        List,
+        ListItem,
+        ListItemIcon,
+        ListItemText,
+
+        Clear,
+        Create
     } = MaterialUI;
 
 
@@ -145,14 +156,9 @@
                     >
                         Sign In
                     </Button>
-                    <Grid container>
-                        <Grid item xs>
-                            <Link href="#" variant="body2">
-                                Forgot password?
-                            </Link>
-                        </Grid>
+                    <Grid container justifyContent="flex-end">
                         <Grid item>
-                            <Link href="#" variant="body2">
+                            <Link href="/register" variant="body2">
                                 {"Don't have an account? Sign Up"}
                             </Link>
                         </Grid>
@@ -163,14 +169,116 @@
     }
 
     function RegisterPage() {
+        const handleSubmit = e => {
+            e.preventDefault()
+            console.log(e.target.username.value, e.target.id.value, e.target.password.value)
+        }
+
         return (
-            <h1>Register Page</h1>
+            <Container component="main" maxWidth="xs" style={{marginTop: '10%'}}>
+                <Typography component="h1" variant="h5">
+                    회원가입
+                </Typography>
+                <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="username"
+                        label="User Name"
+                        name="username"
+                        autoComplete="family-name"
+                        autoFocus
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="id"
+                        label="User Id"
+                        name="id"
+                        autoComplete="id"
+                    />
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        sx={{mt: 3, mb: 2}}
+                    >
+                        Sign Up
+                    </Button>
+                    <Grid container justifyContent="flex-end">
+                        <Grid item>
+                            <Link href="/login" variant="body2">
+                                Already have an account? Sign in
+                            </Link>
+                        </Grid>
+                    </Grid>
+                </Box>
+            </Container>
         )
     }
 
     function MainPage() {
+        const handleSubmit = e => {
+            e.preventDefault()
+            console.log(e.target)
+        }
+
         return (
-            <h1>MainPage</h1>
+            <Container component="main" maxWidth="md" style={{marginTop: '32px'}}>
+                <Typography component="h1" variant="h5">
+                    TODO APP
+                </Typography>
+
+                <Grid container style={{margin:'32px 0'}}>
+                    <Grid item md={11} style={{paddingRight: '16px'}}>
+                        <TextField
+                            variant="standard"
+                            placeholder="할 일 추가하기"
+                            fullWidth
+                            style={{padding: '16px'}}
+                        />
+                    </Grid>
+                    <Grid item md={1}>
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            style={{padding: '16px'}}
+                        >
+                            추가
+                        </Button>
+                    </Grid>
+                </Grid>
+
+                <Card>
+                    <List>
+                        <ListItem>
+                            <ListItemIcon>
+                                <Checkbox tabIndex={-1} disableRipple />
+                            </ListItemIcon>
+                            <ListItemText>todo1</ListItemText>
+                            <IconButton color="warning" aria-label="Delete" fontSize="small">
+                                <ListItemText>수정</ListItemText>
+                            </IconButton>
+                            <IconButton color="warning" aria-label="Delete" fontSize="small">
+                                <ListItemText>삭제</ListItemText>
+                            </IconButton>
+                        </ListItem>
+                    </List>
+                </Card>
+            </Container>
         )
     }
 
