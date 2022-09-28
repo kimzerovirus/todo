@@ -1,5 +1,7 @@
 package me.kzv.todo.service
 
+import me.kzv.todo.controller.dto.TodoDeleteRequest
+import me.kzv.todo.controller.dto.TodoListRequest
 import me.kzv.todo.controller.dto.TodoRequest
 import me.kzv.todo.entity.Member
 import me.kzv.todo.entity.Todo
@@ -14,7 +16,7 @@ class TodoService (
 ){
     @Transactional
     fun create(request: TodoRequest) : List<Todo> {
-        val author = Member(request.authorId)
+        val author = Member(request.authorId!!)
         val todo = Todo(
             todo = request.todo,
             author = author
@@ -26,22 +28,21 @@ class TodoService (
 
     @Transactional
     fun edit(request: TodoRequest): List<Todo> {
-        val author = Member(request.authorId)
-        todoRepository.findByIdOrNull(request.id)?.run {
+        val todo = todoRepository.findByIdOrNull(request.id)?.run {
             todo = request.todo
             todoRepository.save(this)
         }
 
-        return todoRepository.findByAuthor(author)
+        return todoRepository.findByAuthor(todo!!.author)
     }
 
     @Transactional
-    fun delete(request: TodoRequest): List<Todo> {
+    fun delete(request: TodoDeleteRequest): List<Todo> {
         todoRepository.deleteById(request.id)
 
         return todoRepository.findByAuthor(Member(request.authorId))
     }
 
-    fun getList(request: TodoRequest): List<Todo> = todoRepository.findByAuthor(Member(request.authorId))
+    fun getList(request: TodoListRequest): List<Todo> = todoRepository.findByAuthor(Member(request.authorId))
 
 }

@@ -1,5 +1,7 @@
 package me.kzv.todo.controller
 
+import me.kzv.todo.controller.dto.TodoDeleteRequest
+import me.kzv.todo.controller.dto.TodoListRequest
 import me.kzv.todo.controller.dto.TodoRequest
 import me.kzv.todo.entity.Todo
 import me.kzv.todo.service.TodoService
@@ -17,9 +19,8 @@ class TodoController(
     fun edit(@RequestBody request: TodoRequest): List<Todo> = todoService.edit(request)
 
     @PostMapping("/delete")
-    fun delete(@RequestBody request: TodoRequest): List<Todo> = todoService.delete(request)
+    fun delete(@RequestBody request: TodoDeleteRequest): List<Todo> = todoService.delete(request)
 
     @PostMapping("/list")
-    fun list(@RequestBody request: TodoRequest): List<Todo> = todoService.getList(request)
-
+    fun list(@RequestBody request: TodoListRequest): List<Todo> = todoService.getList(request)
 }

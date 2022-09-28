@@ -27,8 +27,10 @@
 <div id="root"></div>
 
 <script data-plugins="transform-es2015-modules-umd" type="text/babel" src="Router.jsx"></script>
+<script data-plugins="transform-es2015-modules-umd" type="text/babel" src="api.js"></script>
 <script data-plugins="transform-es2015-modules-umd" type="text/babel">
     import Router from './Router.jsx'
+    import {apiCall} from './api.js'
 
     const {useState, useEffect, useMemo, createContext, useContext} = React;
     const {
@@ -75,57 +77,18 @@
     const METHOD_POST = 'POST';
     const METHOD_GET = 'GET';
 
-    const apiCall = async (url, method, body) => {
-        const token = window.localStorage.getItem("token");
-        const headers = new Headers({
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        })
-
-        // [ERROR] Uncaught (in promise) SyntaxError: Unexpected end of JSON input
-        // https://melonicedlatte.com/2022/03/13/010400.html
-        return fetch(url, {
-            headers,
-            method,
-            body: JSON.stringify(body)
-        }).then(res => {
-            if (res.status === 200) {
-                return res.json();
-            } else {
-                alert('요청이 실패하였습니다.')
-                return Promise.reject(res);
-            }
-        }).catch(err => {
-            if (err.status === 401) {
-                window.localStorage.removeItem('token')
-                window.location.href = './login'
-            }
-        })
-    }
-
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////// COMPONENTS ///////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function Todo({id, todo, isFinished}) {
-        const {user} = useAuth();
+    function Todo({id, todo, isFinished, handleModifySubmit, handleDeleteSubmit}) {
         const [isModifyMode, setIsModifyMode] = useState(false);
         const [isFinishedValue, setIsFinishedValue] = useState(isFinished);
         const [todoValue, setTodoValue] = useState(todo);
 
-        const modifySubmitHandler = () => {
-            const modifyData = {
-                authorId: user.userId,
-                id,
-                todo: todoValue,
-                isFinished: isFinishedValue,
-            }
-            console.log(modifyData)
-        }
-
         return (
-            <Card>
+            <Card style={{marginBottom: '16px'}}>
                 <ListItem>
                     <ListItemIcon>
                         <Checkbox checked={isFinishedValue} onChange={() => setIsFinishedValue(state => !state)}/>
@@ -143,14 +106,39 @@
                             sx={{textDecoration: isFinishedValue ? 'line-through' : 'none'}}
                         />
                     </ListItemText>
-                    <IconButton color="warning" onClick={modifySubmitHandler}>
-                        <ListItemText>수정</ListItemText>
-                    </IconButton>
-                    <IconButton color="warning">
-                        <ListItemText>삭제</ListItemText>
-                    </IconButton>
+                    <Button color="warning" onClick={() => handleModifySubmit(id, todoValue)}>수정</Button>
+                    <Button color="warning" onClick={() => handleDeleteSubmit(id)}>삭제</Button>
                 </ListItem>
             </Card>
+        )
+    }
+
+    function AddTodo({handleCreateSubmit}) {
+        return (
+            <Box component="form" onSubmit={e => handleCreateSubmit(e.target.addTodo.value)} noValidate>
+                <Grid container>
+                    <Grid item md={11} style={{paddingRight: '32px'}}>
+                        <TextField
+                            variant="standard"
+                            placeholder="할 일 추가하기"
+                            fullWidth
+                            style={{padding: '16px 0'}}
+                            name="addTodo"
+                            id="addTodo"
+                        />
+                    </Grid>
+                    <Grid item md={1}>
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            style={{padding: '16px'}}
+                        >
+                            추가
+                        </Button>
+                    </Grid>
+                </Grid>
+            </Box>
         )
     }
 
@@ -331,21 +319,43 @@
 
     function MainPage() {
         const {user, signOut} = useAuth();
-        const {todos, setTodos} = useState();
+        const [todos, setTodos] = useState([]);
 
         useEffect(() => {
             if (user) {
                 apiCall(BASE_URL + 'todo/list', METHOD_POST, {
-                    userId: user.userId
+                    authorId: user.userId
                 }).then(data => {
                     setTodos(data)
                 })
             }
         }, [user])
 
-        const handleSubmit = e => {
-            e.preventDefault()
-            console.log(e.target)
+        const handleCreateSubmit = addTodo => {
+            apiCall(BASE_URL + 'todo/create', METHOD_POST, {
+                authorId: user.userId,
+                todo: addTodo,
+            }).then(data => {
+                setTodos(data)
+            })
+        }
+
+        const handleModifySubmit = (id, todoValue) => {
+            apiCall(BASE_URL + 'todo/edit', METHOD_POST, {
+                authorId: user.userId,
+                id,
+                todo: todoValue,
+                isFinished: false,
+            }).then(data => {
+                setTodos(data)
+                alert("수정 완료!!")
+            })
+        }
+
+        const handleDeleteSubmit = id => {
+            apiCall(BASE_URL + 'todo/delete', METHOD_POST, {id, authorId: user.userId}).then(data => {
+                setTodos(data)
+            })
         }
 
         return (
@@ -362,31 +372,15 @@
                     </Toolbar>
                 </AppBar>
 
-                <Container component="main" maxWidth="md" style={{marginTop: '32px'}}>
-                    <Grid container style={{margin: '32px 0'}}>
-                        <Grid item md={11} style={{paddingRight: '16px'}}>
-                            <TextField
-                                variant="standard"
-                                placeholder="할 일 추가하기"
-                                fullWidth
-                                style={{padding: '16px'}}
-                            />
-                        </Grid>
-                        <Grid item md={1}>
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                style={{padding: '16px'}}
-                            >
-                                추가
-                            </Button>
-                        </Grid>
-                    </Grid>
+                <Container component="main" maxWidth="md" sx={{mt: 4}}>
+                    <AddTodo handleCreateSubmit={handleCreateSubmit}/>
+                </Container>
 
+                <Container component="main" maxWidth="md" sx={{mt: 4}}>
                     <List>
-                        {todos ? todos.map((todo, index) => (
-                                <Todo key={index} id={todo.id} todo={todo.todo} isFinished={todo.isFinished}/>)) :
+                        {todos.length > 0 ? todos.map((todo, index) => (
+                                <Todo key={index} id={todo.id} todo={todo.todo} isFinished={todo.isFinished}
+                                      handleModifySubmit={handleModifySubmit} handleDeleteSubmit={handleDeleteSubmit}/>)) :
                             <p style={{width: "100%", textAlign: "center"}}>할 일이 존재하지 않습니다.</p>
                         }
                     </List>
