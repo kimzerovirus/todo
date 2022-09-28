@@ -6,8 +6,10 @@ import io.jsonwebtoken.SignatureAlgorithm
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import me.kzv.todo.exception.UnAuthorizationException
+import org.springframework.util.StringUtils
 import java.security.Key
 import java.util.*
+import javax.servlet.http.HttpServletRequest
 
 
 private const val SECRET_KEY: String = "c3ByaW5nLWJvb3Qtc2VjdXJdc3ByaW5nLWJvb3Qtc2VjdXc3ByaW5nLWJvb3Qtc2VjdXJpd3ByaW5nLWJvb3Qtc2VjdXJpd"
@@ -33,4 +35,11 @@ fun parseToken(token: String): String {
     } catch (e: ExpiredJwtException) {
         throw UnAuthorizationException("토큰 인증 실패")
     }
+}
+
+fun parseBearerToken(request: HttpServletRequest): String? {
+    val bearerToken = request.getHeader("Authorization")
+    return if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
+        bearerToken.substring(7)
+    } else null
 }

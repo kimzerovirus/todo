@@ -3,7 +3,7 @@ package me.kzv.todo.controller.dto
 import me.kzv.todo.entity.Member
 
 data class MemberRequest(
-    val username: String,
+    val username: String? = null,
     val userId: String,
     val password: String,
 )

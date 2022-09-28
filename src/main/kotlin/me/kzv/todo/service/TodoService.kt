@@ -36,7 +36,12 @@ class TodoService (
     }
 
     @Transactional
-    fun delete(request: TodoRequest) {
+    fun delete(request: TodoRequest): List<Todo> {
         todoRepository.deleteById(request.id)
+
+        return todoRepository.findByAuthor(Member(request.authorId))
     }
+
+    fun getList(request: TodoRequest): List<Todo> = todoRepository.findByAuthor(Member(request.authorId))
+
 }

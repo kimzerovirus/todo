@@ -30,7 +30,7 @@
 <script data-plugins="transform-es2015-modules-umd" type="text/babel">
     import Router from './Router.jsx'
 
-    const {useState, useEffect} = React;
+    const {useState, useEffect, useMemo, createContext, useContext} = React;
     const {
         colors,
         CssBaseline,
@@ -53,6 +53,7 @@
         ListItemIcon,
         ListItemText,
         Stack,
+        Input,
     } = MaterialUI;
 
 
@@ -70,27 +71,36 @@
         },
     });
 
-    const apiCall = (url, method, body) => {
-        const token = window.localStorage.getItem("token")
+    const BASE_URL = 'http://localhost:8080/api/v1/';
+    const METHOD_POST = 'POST';
+    const METHOD_GET = 'GET';
+
+    const apiCall = async (url, method, body) => {
+        const token = window.localStorage.getItem("token");
         const headers = new Headers({
             'Content-Type': 'application/json',
             'Authorization': 'Bearer ' + token
         })
 
-        fetch(url, {
+        // [ERROR] Uncaught (in promise) SyntaxError: Unexpected end of JSON input
+        // https://melonicedlatte.com/2022/03/13/010400.html
+        return fetch(url, {
             headers,
             method,
             body: JSON.stringify(body)
+        }).then(res => {
+            if (res.status === 200) {
+                return res.json();
+            } else {
+                alert('요청이 실패하였습니다.')
+                return Promise.reject(res);
+            }
+        }).catch(err => {
+            if (err.status === 401) {
+                window.localStorage.removeItem('token')
+                window.location.href = './login'
+            }
         })
-            .then(res => {
-                return res.json()
-            })
-            .catch(err => {
-                if (err.status === 401) {
-                    window.localStorage.removeItem('token')
-                    window.location.href = './login'
-                }
-            })
     }
 
 
@@ -98,12 +108,92 @@
     /////////////////////////////////////////////// COMPONENTS ///////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function Todo() {
+    function Todo({id, todo, isFinished}) {
+        const {user} = useAuth();
+        const [isModifyMode, setIsModifyMode] = useState(false);
+        const [isFinishedValue, setIsFinishedValue] = useState(isFinished);
+        const [todoValue, setTodoValue] = useState(todo);
+
+        const modifySubmitHandler = () => {
+            const modifyData = {
+                authorId: user.userId,
+                id,
+                todo: todoValue,
+                isFinished: isFinishedValue,
+            }
+            console.log(modifyData)
+        }
+
         return (
-            <h1>TODO</h1>
+            <Card>
+                <ListItem>
+                    <ListItemIcon>
+                        <Checkbox checked={isFinishedValue} onChange={() => setIsFinishedValue(state => !state)}/>
+                    </ListItemIcon>
+                    <ListItemText>
+                        <Input
+                            readOnly={!isModifyMode}
+                            value={todoValue}
+                            multiline
+                            fullWidth
+                            disableUnderline={!isModifyMode}
+                            onChange={e => setTodoValue(e.currentTarget.value)}
+                            onClick={() => setIsModifyMode(true)}
+                            onBlur={() => setIsModifyMode(false)}
+                            sx={{textDecoration: isFinishedValue ? 'line-through' : 'none'}}
+                        />
+                    </ListItemText>
+                    <IconButton color="warning" onClick={modifySubmitHandler}>
+                        <ListItemText>수정</ListItemText>
+                    </IconButton>
+                    <IconButton color="warning">
+                        <ListItemText>삭제</ListItemText>
+                    </IconButton>
+                </ListItem>
+            </Card>
         )
     }
 
+    const AuthContext = createContext(null);
+
+    function AuthProvider({children}) {
+        const [user, setUser] = useState(null);
+        const signIn = (authenticatedUser) => setUser(authenticatedUser);
+        const signOut = () => {
+            window.localStorage.removeItem("token");
+            setUser(null)
+        };
+
+
+        const value = {user, signIn, signOut}
+
+        return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+    }
+
+    function useAuth() {
+        return useContext(AuthContext)
+    }
+
+    function Authentication({children}) {
+        const {user, signIn} = useAuth();
+        const token = window.localStorage.getItem("token")
+
+        useEffect(() => {
+            if (!user && !token || user && !token) window.location.href = './login';
+            else if (!user && token) apiCall(BASE_URL + 'member/my-info', METHOD_GET).then(data => signIn({
+                userId: data.userId,
+                username: data.username
+            }))
+        }, [user])
+
+        window.onpageshow = function (event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type == 2)) {
+                if (!user || !token) window.location.href = './login';
+            }
+        }
+
+        return children;
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////////// PAGES ///////////////////////////////////////////////////
@@ -111,10 +201,18 @@
 
 
     function LoginPage() {
+        const {signIn} = useAuth();
 
         const handleSubmit = e => {
             e.preventDefault()
-            console.log(e.target.email.value, e.target.password.value)
+            apiCall(BASE_URL + 'member/login', METHOD_POST, {
+                userId: e.target.email.value,
+                password: e.target.password.value
+            }).then(data => {
+                signIn({userId: data.userId, username: data.username})
+                window.localStorage.setItem("token", data.token);
+                window.location.href = './'
+            })
         }
 
         return (
@@ -166,7 +264,14 @@
     function RegisterPage() {
         const handleSubmit = e => {
             e.preventDefault()
-            console.log(e.target.username.value, e.target.id.value, e.target.password.value)
+            apiCall(BASE_URL + 'member/register', METHOD_POST, {
+                username: e.target.username.value,
+                userId: e.target.id.value,
+                password: e.target.password.value
+            }).then(() => {
+                alert("회원 가입 성공")
+                window.location.href = './login'
+            })
         }
 
         return (
@@ -225,13 +330,22 @@
     }
 
     function MainPage() {
+        const {user, signOut} = useAuth();
+        const {todos, setTodos} = useState();
+
+        useEffect(() => {
+            if (user) {
+                apiCall(BASE_URL + 'todo/list', METHOD_POST, {
+                    userId: user.userId
+                }).then(data => {
+                    setTodos(data)
+                })
+            }
+        }, [user])
+
         const handleSubmit = e => {
             e.preventDefault()
             console.log(e.target)
-        }
-
-        const handleClick = () => {
-
         }
 
         return (
@@ -242,8 +356,8 @@
                             TODO APP
                         </Typography>
                         <Stack direction="row" spacing={2}>
-                            <Button color='inherit'>{"임시 유저"}</Button>
-                            <Button color='inherit' onClick={handleClick}>로그아웃</Button>
+                            <Button color='inherit'>{user ? user.username : ""}</Button>
+                            <Button color='inherit' onClick={signOut}>로그아웃</Button>
                         </Stack>
                     </Toolbar>
                 </AppBar>
@@ -270,22 +384,12 @@
                         </Grid>
                     </Grid>
 
-                    <Card>
-                        <List>
-                            <ListItem>
-                                <ListItemIcon>
-                                    <Checkbox tabIndex={-1} disableRipple/>
-                                </ListItemIcon>
-                                <ListItemText>todo1</ListItemText>
-                                <IconButton color="warning" aria-label="Delete">
-                                    <ListItemText>수정</ListItemText>
-                                </IconButton>
-                                <IconButton color="warning" aria-label="Delete">
-                                    <ListItemText>삭제</ListItemText>
-                                </IconButton>
-                            </ListItem>
-                        </List>
-                    </Card>
+                    <List>
+                        {todos ? todos.map((todo, index) => (
+                                <Todo key={index} id={todo.id} todo={todo.todo} isFinished={todo.isFinished}/>)) :
+                            <p style={{width: "100%", textAlign: "center"}}>할 일이 존재하지 않습니다.</p>
+                        }
+                    </List>
                 </Container>
             </div>
         )
@@ -300,7 +404,7 @@
     function App() {
         return (
             <Router routes={{
-                '/': <MainPage/>,
+                '/': <Authentication><MainPage/></Authentication>,
                 '/login': <LoginPage/>,
                 '/register': <RegisterPage/>
             }}/>
@@ -312,7 +416,9 @@
     root.render(
         <ThemeProvider theme={theme}>
             <CssBaseline/>
-            <App/>
+            <AuthProvider>
+                <App/>
+            </AuthProvider>
         </ThemeProvider>,
     );
 </script>
